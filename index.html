@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>a question for you</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF6F2;
+    --blush:#FBD9DF;
+    --rose:#D6567A;
+    --rose-deep:#B23A5C;
+    --plum:#3A2039;
+    --gold:#E3A857;
+    --card-shadow: 0 20px 50px rgba(178,58,92,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --cream:#241621;
+      --blush:#3A2233;
+      --plum:#FBEAF0;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#241621;
+    --blush:#3A2233;
+    --plum:#FBEAF0;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    height:100%;
+    margin:0;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  body{
+    font-family:'Poppins',sans-serif;
+    background:
+      radial-gradient(circle at 15% 20%, var(--blush) 0%, transparent 45%),
+      radial-gradient(circle at 85% 80%, var(--blush) 0%, transparent 45%),
+      var(--cream);
+    color:var(--plum);
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    position:relative;
+  }
+  #confetti-canvas{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+  }
+  .stage{
+    width:min(92vw,420px);
+    position:relative;
+  }
+  .card{
+    background:#fff;
+    border-radius:28px;
+    padding:44px 32px 36px;
+    text-align:center;
+    box-shadow:var(--card-shadow);
+    display:none;
+    animation:pop .5s cubic-bezier(.2,.9,.3,1.2);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .card{ background:#2E1B29; }
+  }
+  :root[data-theme="dark"] .card{ background:#2E1B29; }
+  .card.active{display:block;}
+  @keyframes pop{
+    from{opacity:0; transform:translateY(14px) scale(.96);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+  .icon{
+    width:74px;height:74px;border-radius:20px;
+    background:linear-gradient(155deg,var(--rose),var(--rose-deep));
+    margin:0 auto 22px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:34px;
+    box-shadow:0 10px 22px rgba(214,86,122,.35);
+  }
+  h1{
+    font-family:'Playfair Display',serif;
+    font-size:26px;
+    line-height:1.3;
+    margin:0 0 6px;
+    font-weight:700;
+  }
+  .sub{
+    font-size:14px;
+    color:var(--rose-deep);
+    opacity:.85;
+    margin:0 0 28px;
+  }
+  .relative-zone{
+    position:relative;
+    height:64px;
+    margin-top:8px;
+  }
+  button{
+    font-family:'Poppins',sans-serif;
+    font-weight:500;
+    border:none;
+    cursor:pointer;
+    border-radius:999px;
+    font-size:15px;
+  }
+  .btn-yes{
+    background:linear-gradient(135deg,var(--rose),var(--rose-deep));
+    color:#fff;
+    padding:14px 40px;
+    box-shadow:0 12px 24px rgba(214,86,122,.3);
+    transition:transform .15s ease;
+  }
+  .btn-yes:active{transform:scale(.96);}
+  .btn-no{
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--blush);
+    color:var(--rose-deep);
+    padding:14px 34px;
+    transition:left .18s ease, top .18s ease;
+  }
+  .grow-note{
+    font-size:12.5px;
+    color:var(--plum);
+    opacity:.55;
+    margin-top:18px;
+  }
+  label{
+    display:block;
+    text-align:left;
+    font-size:13px;
+    font-weight:500;
+    color:var(--rose-deep);
+    margin:18px 0 6px;
+  }
+  input,select{
+    width:100%;
+    padding:13px 14px;
+    border-radius:12px;
+    border:1.5px solid var(--blush);
+    background:var(--cream);
+    color:var(--plum);
+    font-family:'Poppins',sans-serif;
+    font-size:14.5px;
+  }
+  input:focus,select:focus{outline:2px solid var(--rose); outline-offset:1px;}
+  .btn-set{
+    width:100%;
+    margin-top:24px;
+    background:linear-gradient(135deg,var(--rose),var(--rose-deep));
+    color:#fff;
+    padding:14px;
+    box-shadow:0 12px 24px rgba(214,86,122,.3);
+  }
+  .btn-set:active{transform:scale(.98);}
+  .confirm-msg{display:none;}
+  .confirm-msg.active{
+    display:block;
+    font-family:'Playfair Display',serif;
+    font-size:20px;
+    margin-top:20px;
+    color:var(--rose-deep);
+  }
+  .footer-note{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--plum);
+    opacity:.4;
+    margin-top:18px;
+  }
+  .float-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:1;
+  }
+  .float-item{
+    position:absolute;
+    bottom:-40px;
+    font-size:18px;
+    opacity:.35;
+    animation:float linear infinite;
+  }
+  @keyframes float{
+    to{ transform:translateY(-110vh) rotate(20deg); opacity:0; }
+  }
+  .note{
+    display:none;
+    margin-top:22px;
+    padding:18px 16px;
+    border-radius:16px;
+    background:var(--blush);
+    text-align:left;
+  }
+  .note.active{display:block;}
+  .note p{
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+    font-size:14.5px;
+    line-height:1.6;
+    margin:0;
+    color:var(--rose-deep);
+  }
+  .note .sign{
+    display:block;
+    text-align:right;
+    margin-top:10px;
+    font-style:normal;
+    font-weight:600;
+  }
+</style>
+</head>
+<body>
+
+<div class="float-layer" id="floatLayer"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="stage">
+
+  <!-- Step 1: the ask -->
+  <div class="card active" id="card-ask">
+    <div class="icon">🐾</div>
+    <h1>Will you go on a date with me, Anupama?</h1>
+    <p class="sub">just checking before I plan the whole evening</p>
+    <div class="relative-zone">
+      <button class="btn-yes" id="yesBtn" onclick="showCard('card-celebrate')">Yes ♥</button>
+      <button class="btn-no" id="noBtn">no</button>
+    </div>
+    <p class="grow-note" id="dodgeNote"></p>
+  </div>
+
+  <!-- Step 2: celebration -->
+  <div class="card" id="card-celebrate">
+    <div class="icon">🎉</div>
+    <h1>Wait, you actually said yes, Anupama??</h1>
+    <p class="sub">I was fully ready to chase that "no" button around the screen</p>
+    <button class="btn-yes" onclick="showCard('card-plan')">Okay okay! →</button>
+  </div>
+
+  <!-- Step 3: pick a day -->
+  <div class="card" id="card-plan">
+    <div class="icon">📅</div>
+    <h1>So... when are you free?</h1>
+    <p class="sub">let's actually put it on the calendar</p>
+
+    <div id="planForm">
+      <label for="dateInput">Pick a day</label>
+      <input type="date" id="dateInput">
+
+      <label for="timeSelect">What time?</label>
+      <select id="timeSelect">
+        <option value="">Select a time...</option>
+        <option>Morning coffee — 10:00 AM</option>
+        <option>Lunch — 1:00 PM</option>
+        <option>Afternoon walk — 4:00 PM</option>
+        <option>Dinner — 7:00 PM</option>
+        <option>Late night — 9:00 PM</option>
+      </select>
+
+      <button class="btn-set" onclick="setDate()">set the date! ♥</button>
+    </div>
+
+    <p class="confirm-msg" id="confirmMsg"></p>
+    <div class="note" id="noteBlock">
+      <p>Anupama, I don't say this often enough, but you make ordinary days feel like they're worth showing up for. Can't wait for this one.
+        <span class="sign">— yours</span>
+      </p>
+    </div>
+  </div>
+
+  <p class="footer-note">made with a little bit of nerves, for Anupama</p>
+</div>
+
+<script>
+function showCard(id){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='card-celebrate'){ burstConfetti(); }
+}
+
+// dodging "no" button
+const noBtn = document.getElementById('noBtn');
+const zone = noBtn.parentElement;
+const note = document.getElementById('dodgeNote');
+let dodges = 0;
+const notes = [
+  "nice try", "nope, try again", "almost had it", "it's not going to happen",
+  "you might as well click yes", "okay this is getting impressive", "just say yes 🥺"
+];
+function dodge(){
+  const zw = zone.clientWidth, zh = zone.clientHeight;
+  const bw = noBtn.offsetWidth, bh = noBtn.offsetHeight;
+  const maxX = Math.max(zw - bw, 0);
+  const maxY = Math.max(zh - bh, 0);
+  const x = Math.random()*maxX;
+  const y = Math.random()*maxY;
+  noBtn.style.left = x + 'px';
+  noBtn.style.top = y + 'px';
+  noBtn.style.transform = 'none';
+  dodges++;
+  note.textContent = notes[Math.min(dodges-1, notes.length-1)];
+}
+noBtn.addEventListener('mouseenter', dodge);
+noBtn.addEventListener('touchstart', function(e){ e.preventDefault(); dodge(); }, {passive:false});
+noBtn.addEventListener('click', function(e){ e.preventDefault(); dodge(); });
+
+function setDate(){
+  const d = document.getElementById('dateInput').value;
+  const t = document.getElementById('timeSelect').value;
+  const msg = document.getElementById('confirmMsg');
+  if(!d || !t){
+    msg.style.color = 'var(--rose-deep)';
+    msg.textContent = "pick a day and a time first 🙂";
+    msg.classList.add('active');
+    return;
+  }
+  const dateObj = new Date(d + 'T00:00:00');
+  const formatted = dateObj.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric'});
+  msg.textContent = `It's a date — ${formatted}, ${t.split('—')[0].trim()} ♥`;
+  msg.classList.add('active');
+  document.getElementById('planForm').querySelector('.btn-set').textContent = 'date is set ♥';
+  document.getElementById('noteBlock').classList.add('active');
+  burstConfetti();
+}
+
+// soft ambient floating hearts/paws
+const floatLayer = document.getElementById('floatLayer');
+const floatChars = ['♥','🐾'];
+function spawnFloat(){
+  const el = document.createElement('span');
+  el.className = 'float-item';
+  el.textContent = floatChars[Math.floor(Math.random()*floatChars.length)];
+  el.style.left = Math.random()*100 + 'vw';
+  el.style.fontSize = (14 + Math.random()*14) + 'px';
+  const duration = 9 + Math.random()*8;
+  el.style.animationDuration = duration + 's';
+  floatLayer.appendChild(el);
+  setTimeout(()=>el.remove(), duration*1000);
+}
+setInterval(spawnFloat, 1400);
+for(let i=0;i<4;i++){ setTimeout(spawnFloat, i*400); }
+
+// lightweight confetti burst
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+function resize(){ canvas.width = innerWidth; canvas.height = innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+let particles = [];
+function burstConfetti(){
+  const colors = ['#D6567A','#E3A857','#FBD9DF','#B23A5C','#ffffff'];
+  for(let i=0;i<70;i++){
+    particles.push({
+      x: canvas.width/2 + (Math.random()-0.5)*80,
+      y: canvas.height*0.35,
+      vx: (Math.random()-0.5)*8,
+      vy: Math.random()*-8 - 2,
+      size: Math.random()*6+4,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*360,
+      vr: (Math.random()-0.5)*10,
+      life: 0
+    });
+  }
+  if(!animating){ animating = true; requestAnimationFrame(animateConfetti); }
+}
+let animating = false;
+function animateConfetti(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.vy += 0.25;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vr;
+    p.life++;
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.rot*Math.PI/180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);
+    ctx.restore();
+  });
+  particles = particles.filter(p=>p.y < canvas.height+40 && p.life < 260);
+  if(particles.length>0){
+    requestAnimationFrame(animateConfetti);
+  } else {
+    animating = false;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+}
+</script>
+</body>
+</html>
